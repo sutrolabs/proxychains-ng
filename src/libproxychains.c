@@ -34,6 +34,7 @@
 #include <dlfcn.h>
 #include <pthread.h>
 
+#include <netinet/tcp.h>
 
 #include "core.h"
 #include "common.h"
@@ -525,6 +526,13 @@ int connect(int sock, const struct sockaddr *addr, unsigned int len) {
 	fcntl(sock, F_SETFL, flags);
 	if(ret != SUCCESS)
 		errno = ECONNREFUSED;
+
+	fprintf(stderr, LOG_PREFIX "setting keepalive options\n");
+	int keepalive = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (void*)&keepalive, sizeof(keepalive))) { perror("ERROR: setsockopt(), SO_KEEPALIVE"); exit(1); };
+	int secs = 10;
+	if (setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, (void*)&secs, sizeof(secs))) { perror("ERROR: setsockopt(), TCP_KEEPALIVE"); exit(1); };
+
 	return ret;
 }
 
