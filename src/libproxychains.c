@@ -531,7 +531,12 @@ int connect(int sock, const struct sockaddr *addr, unsigned int len) {
 	int keepalive = 1;
 	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (void*)&keepalive, sizeof(keepalive))) { perror("ERROR: setsockopt(), SO_KEEPALIVE"); exit(1); };
 	int secs = 10;
+#ifdef IS_MAC
 	if (setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, (void*)&secs, sizeof(secs))) { perror("ERROR: setsockopt(), TCP_KEEPALIVE"); exit(1); };
+#else
+	if (setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&secs, sizeof(secs))) { perror("ERROR: setsockopt(), TCP_KEEPIDLE"); exit(1); };
+	if (setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (void*)&secs, sizeof(secs))) { perror("ERROR: setsockopt(), TCP_KEEPINTVL"); exit(1); };
+#endif
 
 	return ret;
 }
